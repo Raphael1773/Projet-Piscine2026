@@ -13,9 +13,9 @@ $mot_de_passe = password_hash(
     PASSWORD_DEFAULT
 );
 
-$sql = "INSERT INTO utilisateur
-(nom, prenom, email, mot_de_passe)
-VALUES (?, ?, ?, ?)";
+$sql = "INSERT INTO utilisateur 
+(nom, prenom, email, mot_de_passe, role, date_creation, statut_compte)
+VALUES(?,?,?,?,'client',NOW(),'actif')";
 
 $stmt = $conn->prepare($sql);
 
