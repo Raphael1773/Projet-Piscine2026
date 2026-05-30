@@ -3,7 +3,7 @@
 $host = "localhost";
 $user = "root";
 $password = "";
-$database = "mercato_nova";
+$database = "piscine";
 
 $conn = new mysqli(
     $host,
