@@ -5,10 +5,10 @@ if (!isset($_SESSION["nom"])) {
     exit();
 }
 include "back_end/db.php";
- 
-$sql = "SELECT * FROM utilisateur WHERE nom = ?";
+
+$sql = "SELECT * FROM utilisateur WHERE id_utilisateur = ?";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("s", $_SESSION["nom"]);
+$stmt->bind_param("i", $_SESSION["id_utilisateur"]);
 $stmt->execute();
 $result = $stmt->get_result();
 $user = $result->fetch_assoc();
