@@ -86,9 +86,9 @@ if (
                 LOGO
             </div>
 
-            <div class="site-name">
-                Mercato Nova
-            </div>
+            <a href="home.php" class="site-name">
+              Mercato Nova
+            </a>
 
         </div>
 
