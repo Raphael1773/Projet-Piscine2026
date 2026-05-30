@@ -630,3 +630,45 @@ select {
 .bouton-panier:hover {
     background-color: #444;
 }
+.btn-action-produit {
+    margin-top: 15px;
+    background-color: #333;
+    color: white;
+    border: none;
+    padding: 12px;
+    width: 100%;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.btn-action-produit:hover {
+    background-color: #555;
+}
+
+.prix-produit {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.type-produit-home {
+    color: #aaa;
+    font-size: 14px;
+}
+
+.image-panier img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.btn-retirer-panier {
+    background-color: #3a1f1f;
+    border: 1px solid #7a3333;
+    color: white;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.btn-retirer-panier:hover {
+    background-color: #5a2a2a;
+}
