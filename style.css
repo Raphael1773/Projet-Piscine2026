@@ -334,26 +334,39 @@ a {
     text-align: center;
 }
 .profile-actions {
+
     display: flex;
-    justify-content: space-between;
+
+    flex-direction: row;
+
     gap: 20px;
+
+    width: 100%;
 }
 .profile-actions a {
+
     flex: 1;
-    display: flex;
-}
-.profile-actions a .profile-btn {
-    flex: 1;
+
+    text-decoration: none;
 }
 .profile-btn {
-    width: 100%;
+
+    flex: 1;
+
     padding: 15px;
+
     background-color: #222;
+
     color: white;
+
     border: 2px solid #555;
+
     font-size: 15px;
+
     cursor: pointer;
+
     border-radius: 8px;
+
     transition: 0.3s;
 }
 .profile-btn:hover {
