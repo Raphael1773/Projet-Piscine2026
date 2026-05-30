@@ -27,19 +27,19 @@ if ($result_panier->num_rows > 0) {
     $id_panier = $panier['id_panier'];
 
     $sql_lignes = "
-        SELECT 
-            lignepanier.id_ligne,
-            lignepanier.quantite,
-            lignepanier.prix_unitaire,
-            produit.id_produit,
-            produit.titre,
-            produit.description,
-            produit.type_vente
-			produit.image
-        FROM lignepanier
-        INNER JOIN produit ON lignepanier.id_produit = produit.id_produit
-        WHERE lignepanier.id_panier = ?
-    ";
+    SELECT 
+        lignepanier.id_ligne,
+        lignepanier.quantite,
+        lignepanier.prix_unitaire,
+        produit.id_produit,
+        produit.titre,
+        produit.description,
+        produit.type_vente,
+        produit.image
+    FROM lignepanier
+    INNER JOIN produit ON lignepanier.id_produit = produit.id_produit
+    WHERE lignepanier.id_panier = ?
+";
 
     $stmt_lignes = $conn->prepare($sql_lignes);
     $stmt_lignes->bind_param("i", $id_panier);
