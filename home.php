@@ -9,11 +9,40 @@ if (!isset($_SESSION["id_utilisateur"])) {
     exit();
 }
 
-include "back_end/db.php";
+require_once __DIR__ . "/back_end/db.php";
 
-$sql = "SELECT * FROM produit ORDER BY id_produit DESC";
+/*
+    Filtre de la page :
+    - tous : tous les produits
+    - simple : achats immédiats
+    - enchere : enchères
+    - particulier : négociation
+*/
 
-$result = $conn->query($sql);
+$type_filtre = $_GET["type"] ?? "tous";
+
+if (
+    $type_filtre === "simple" ||
+    $type_filtre === "enchere" ||
+    $type_filtre === "particulier"
+) {
+
+    $sql = "SELECT * FROM produit 
+            WHERE type_vente = ?
+            ORDER BY id_produit DESC";
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $type_filtre);
+    $stmt->execute();
+
+    $result = $stmt->get_result();
+
+} else {
+
+    $sql = "SELECT * FROM produit ORDER BY id_produit DESC";
+
+    $result = $conn->query($sql);
+}
 
 ?>
 
@@ -23,9 +52,11 @@ $result = $conn->query($sql);
 
 <head>
 
+    <meta charset="UTF-8">
+
     <title>Mercato Nova</title>
 
-    <link rel="stylesheet" href="front_end/style.css?v=20">
+    <link rel="stylesheet" href="front_end/style.css?v=30">
 
 </head>
 
@@ -71,17 +102,23 @@ $result = $conn->query($sql);
 
     <div class="menu-buttons">
 
-        <button>
-            Produits
-        </button>
+        <a href="home.php?type=simple">
+            <button>
+                Produits
+            </button>
+        </a>
 
-        <button>
-            Encheres
-        </button>
+        <a href="home.php?type=enchere">
+            <button>
+                Enchères
+            </button>
+        </a>
 
-        <button>
-            Particuliers
-        </button>
+        <a href="home.php?type=particulier">
+            <button>
+                Particuliers
+            </button>
+        </a>
 
     </div>
 
@@ -89,71 +126,122 @@ $result = $conn->query($sql);
 
         <?php
 
-        while ($produit = $result->fetch_assoc()) {
+        if ($result && $result->num_rows > 0) {
+
+            while ($produit = $result->fetch_assoc()) {
 
         ?>
 
-            <div class="product-card">
+                <div class="product-card">
 
-                <?php
+                    <?php
 
-                if (
-                    !empty($produit["image"]) &&
-                    file_exists(
-                        "images/" . $produit["image"]
-                    )
-                ) {
+                    if (
+                        !empty($produit["image"]) &&
+                        file_exists("images/" . $produit["image"])
+                    ) {
 
-                ?>
+                    ?>
 
-                    <img
-                        src="images/<?php echo $produit["image"]; ?>"
-                        class="product-image"
-                    >
+                        <img
+                            src="images/<?php echo htmlspecialchars($produit["image"]); ?>"
+                            class="product-image"
+                            alt="<?php echo htmlspecialchars($produit["titre"]); ?>"
+                        >
 
-                <?php
+                    <?php
 
-                } else {
+                    } else {
 
-                ?>
+                    ?>
 
-                    <div class="product-image">
+                        <div class="product-image">
 
-                        Pas d'image
+                            Pas d'image
 
-                    </div>
+                        </div>
 
-                <?php
+                    <?php
 
-                }
+                    }
 
-                ?>
+                    ?>
 
-                <h3>
+                    <h3>
 
-                    <?php echo htmlspecialchars($produit["titre"]); ?>
+                        <?php echo htmlspecialchars($produit["titre"]); ?>
 
-                </h3>
+                    </h3>
 
-                <p>
+                    <p>
 
-                    <?php echo htmlspecialchars($produit["description"]); ?>
+                        <?php echo htmlspecialchars($produit["description"]); ?>
 
-                </p>
+                    </p>
 
-                <p>
+                    <p class="prix-produit">
 
-                    <?php echo $produit["prix"]; ?> €
+                        <?php echo number_format($produit["prix"], 2, ",", " "); ?> €
 
-                </p>
+                    </p>
 
-                <p>
+                    <p class="type-produit-home">
 
-                    <?php echo htmlspecialchars($produit["type_vente"]); ?>
+                        <?php echo htmlspecialchars($produit["type_vente"]); ?>
 
-                </p>
+                    </p>
 
-            </div>
+                    <?php if ($produit["type_vente"] === "simple") { ?>
+
+                        <form action="back_end/ajouter_panier.php" method="POST">
+
+                            <input
+                                type="hidden"
+                                name="id_produit"
+                                value="<?php echo intval($produit["id_produit"]); ?>"
+                            >
+
+                            <button type="submit" class="btn-action-produit">
+                                Ajouter au panier
+                            </button>
+
+                        </form>
+
+                    <?php } elseif ($produit["type_vente"] === "enchere") { ?>
+
+                        <a href="encheres.php?id_produit=<?php echo intval($produit["id_produit"]); ?>">
+
+                            <button class="btn-action-produit">
+                                Enchérir
+                            </button>
+
+                        </a>
+
+                    <?php } elseif ($produit["type_vente"] === "particulier") { ?>
+
+                        <a href="particuliers.php?id_produit=<?php echo intval($produit["id_produit"]); ?>">
+
+                            <button class="btn-action-produit">
+                                Négocier
+                            </button>
+
+                        </a>
+
+                    <?php } ?>
+
+                </div>
+
+        <?php
+
+            }
+
+        } else {
+
+        ?>
+
+            <p class="message-vide">
+                Aucun produit disponible pour le moment.
+            </p>
 
         <?php
 
