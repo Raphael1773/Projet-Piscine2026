@@ -23,75 +23,45 @@ $user = $result->fetch_assoc();
  
     <div class="navbar">
         <div class="left-section">
-            <div class="logo">
-                LOGO
-            </div>
-            <div class="site-name">
-                Mercato Nova
-            </div>
+            <div class="logo">LOGO</div>
+            <div class="site-name">Mercato Nova</div>
         </div>
         <div class="search-section">
-            <input
-                type="text"
-                placeholder="Recherche..."
-                class="search-bar"
-            >
+            <input type="text" placeholder="Recherche..." class="search-bar">
         </div>
         <div class="right-section">
-            <a href="panier.php" class="icon-link">
-                Panier
-            </a>
-            <a href="profile.php" class="icon-link">
-                Profil
-            </a>
+            <a href="panier.php" class="icon-link">Panier</a>
+            <a href="profile.php" class="icon-link">Profil</a>
         </div>
     </div>
  
-    <div class="profile-container">
+    <div class="profile-wrapper">
+        <div class="profile-box">
  
-        <h1 class="profile-title">Mon Profil</h1>
+            <div class="profile-title-box">Profil</div>
  
-        <div class="profile-card">
- 
-            <div class="profile-row">
-                <span class="profile-label">Nom</span>
-                <span class="profile-value">
-                    <?php echo $user["nom"]; ?>
-                </span>
+            <div class="profile-content">
+                <div class="profile-left">
+                    <p><span class="profile-label">Nom :</span> <?php echo $user["nom"]; ?></p>
+                    <p><span class="profile-label">Prénom :</span> <?php echo $user["prenom"]; ?></p>
+                    <p><span class="profile-label">Email :</span> <?php echo $user["email"]; ?></p>
+                </div>
+                <div class="profile-right">
+                    <span class="profile-label">Rôle :</span>
+                    <div class="role-box"><?php echo $user["role"]; ?></div>
+                </div>
             </div>
  
-            <div class="profile-row">
-                <span class="profile-label">Prénom</span>
-                <span class="profile-value">
-                    <?php echo $user["prenom"]; ?>
-                </span>
-            </div>
- 
-            <div class="profile-row">
-                <span class="profile-label">Email</span>
-                <span class="profile-value">
-                    <?php echo $user["email"]; ?>
-                </span>
-            </div>
- 
-            <div class="profile-row">
-                <span class="profile-label">Rôle</span>
-                <span class="profile-value">
-                    <?php echo $user["role"]; ?>
-                </span>
+            <div class="profile-actions">
+                <a href="mise_en_vente.php">
+                    <button class="profile-btn">Mettre en vente un produit</button>
+                </a>
+                <button class="profile-btn deconnexion-btn" onclick="deconnexion()">
+                    Se Déconnecter
+                </button>
             </div>
  
         </div>
- 
-        <div class="profile-buttons">
-            <a href="home.php">
-                <button>Retour à l'accueil</button>
-            </a>
-            <button onclick="deconnexion()">
-                Se déconnecter
-            </button>
-        </div>
- 
     </div>
  
     <script>
@@ -102,8 +72,7 @@ $user = $result->fetch_assoc();
             );
             const data = await response.json();
             if (data.success) {
-                window.location.href =
-                    "front_end/login.html";
+                window.location.href = "front_end/login.html";
             }
         }
     </script>
