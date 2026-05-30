@@ -27,9 +27,17 @@ if (
     $type_filtre === "particulier"
 ) {
 
-    $sql = "SELECT * FROM produit 
-            WHERE type_vente = ?
-            ORDER BY id_produit DESC";
+	$sql = "
+	SELECT
+		produit.*,
+		utilisateur.nom,
+		utilisateur.prenom
+	FROM produit
+	LEFT JOIN utilisateur
+	ON produit.id_vendeur = utilisateur.id_utilisateur
+	WHERE produit.type_vente = ?
+	ORDER BY produit.id_produit DESC
+	";
 
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $type_filtre);
@@ -39,8 +47,16 @@ if (
 
 } else {
 
-    $sql = "SELECT * FROM produit ORDER BY id_produit DESC";
-
+	$sql = "
+	SELECT
+		produit.*,
+		utilisateur.nom,
+		utilisateur.prenom
+	FROM produit
+	LEFT JOIN utilisateur
+	ON produit.id_vendeur = utilisateur.id_utilisateur
+	ORDER BY produit.id_produit DESC
+	";
     $result = $conn->query($sql);
 }
 
@@ -173,11 +189,47 @@ if (
 
                     </h3>
 
-                    <p>
+                    <button
+						class="btn-details"
+						onclick="toggleDetails(<?php echo $produit['id_produit']; ?>)"
+					>
+						+
+					</button>
 
-                        <?php echo htmlspecialchars($produit["description"]); ?>
+					<div
+						id="details-<?php echo $produit['id_produit']; ?>"
+						class="details-produit"
+					>
 
-                    </p>
+						<p>
+
+							<?php echo htmlspecialchars($produit["description"]); ?>
+
+						</p>
+
+						<p>
+
+							Etat :
+							<?php echo htmlspecialchars($produit["etat"]); ?>
+
+						</p>
+
+						<p>
+
+							Date :
+							<?php echo htmlspecialchars($produit["date_publication"]); ?>
+
+						</p>
+
+						<p>
+
+							Vendeur :
+							<?php echo htmlspecialchars($produit["prenom"]); ?>
+							<?php echo htmlspecialchars($produit["nom"]); ?>
+
+						</p>
+
+					</div>
 
                     <p class="prix-produit">
 
@@ -250,7 +302,37 @@ if (
         ?>
 
     </div>
+	<script>
 
+	function toggleDetails(id)
+	{
+		let bloc =
+			document.getElementById(
+				"details-" + id
+			);
+
+		let bouton =
+			event.target;
+
+		if (
+			bloc.style.display === "block"
+		) {
+
+			bloc.style.display = "none";
+
+			bouton.innerHTML = "+";
+
+		}
+		else {
+
+			bloc.style.display = "block";
+
+			bouton.innerHTML = "-";
+
+		}
+	}
+
+	</script>
 </body>
 
 </html>
