@@ -1,103 +1,168 @@
-<title>Mercato Nova</title>
+<?php
 
-<link rel="stylesheet"
-      href="front_end/style.css">
-<div class="navbar">
+session_start();
 
-    <div class="left-section">
+if (!isset($_SESSION["id_utilisateur"])) {
 
-        <div class="logo">
-            LOGO
+    header("Location: front_end/login.html");
+
+    exit();
+}
+
+include "back_end/db.php";
+
+$sql = "SELECT * FROM produit ORDER BY id_produit DESC";
+
+$result = $conn->query($sql);
+
+?>
+
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <title>Mercato Nova</title>
+
+    <link rel="stylesheet" href="front_end/style.css?v=20">
+
+</head>
+
+<body class="home-body">
+
+    <div class="navbar">
+
+        <div class="left-section">
+
+            <div class="logo">
+                LOGO
+            </div>
+
+            <div class="site-name">
+                Mercato Nova
+            </div>
+
         </div>
 
-        <div class="site-name">
-            Mercato Nova
+        <div class="search-section">
+
+            <input
+                type="text"
+                placeholder="Recherche..."
+                class="search-bar"
+            >
+
+        </div>
+
+        <div class="right-section">
+
+            <a href="panier.php" class="icon-link">
+                Panier
+            </a>
+
+            <a href="profile.php" class="icon-link">
+                Profil
+            </a>
+
         </div>
 
     </div>
 
-    <div class="search-section">
-
-        <input
-            type="text"
-            placeholder="Recherche..."
-            class="search-bar"
-        >
-
-    </div>
-
-    <div class="right-section">
-
-        <a href="panier.php" class="icon-link">
-            Panier
-        </a>
-
-        <a href="profile.php" class="icon-link">
-            Profile
-        </a>
-
-    </div>
-
-</div>
-
-<div class="menu-buttons">
-
-    <button>Produits</button>
-
-    <button>Encheres</button>
-
-    <button>Particuliers</button>
-
-</div>
-
-<div class="products-grid">
-
-    <div class="product-card">
-
-        <img
-		src="images/prismatic_evolution_booster_pack.jpg"
-		class="product-image">
-
-        <p>Prismatic evolution booster pack</p>
-
-        <p>20 €</p>
+    <div class="menu-buttons">
 
         <button>
-            Ajouter au panier
+            Produits
+        </button>
+
+        <button>
+            Encheres
+        </button>
+
+        <button>
+            Particuliers
         </button>
 
     </div>
 
-    <div class="product-card">
+    <div class="products-grid">
 
-        <img
-		src="images/snivy_plush.jpg"
-		class="product-image">
+        <?php
 
-        <p>Snivy plush</p>
+        while ($produit = $result->fetch_assoc()) {
 
-        <p>30 €</p>
+        ?>
 
-        <button>
-            Ajouter au panier
-        </button>
+            <div class="product-card">
+
+                <?php
+
+                if (
+                    !empty($produit["image"]) &&
+                    file_exists(
+                        "images/" . $produit["image"]
+                    )
+                ) {
+
+                ?>
+
+                    <img
+                        src="images/<?php echo $produit["image"]; ?>"
+                        class="product-image"
+                    >
+
+                <?php
+
+                } else {
+
+                ?>
+
+                    <div class="product-image">
+
+                        Pas d'image
+
+                    </div>
+
+                <?php
+
+                }
+
+                ?>
+
+                <h3>
+
+                    <?php echo htmlspecialchars($produit["titre"]); ?>
+
+                </h3>
+
+                <p>
+
+                    <?php echo htmlspecialchars($produit["description"]); ?>
+
+                </p>
+
+                <p>
+
+                    <?php echo $produit["prix"]; ?> €
+
+                </p>
+
+                <p>
+
+                    <?php echo htmlspecialchars($produit["type_vente"]); ?>
+
+                </p>
+
+            </div>
+
+        <?php
+
+        }
+
+        ?>
 
     </div>
 
-    <div class="product-card">
+</body>
 
-        <img
-		src="images/red_panda_plush.jpg"
-		class="product-image">
-
-        <p>Red panda plush</p>
-
-        <p>40 €</p>
-
-        <button>
-            Ajouter au panier
-        </button>
-
-    </div>
-
-</div>
+</html>
