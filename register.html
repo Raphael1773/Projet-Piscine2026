@@ -1,0 +1,108 @@
+<title>Register</title>
+
+<link rel="stylesheet" href="style.css">
+<div class="site-title">
+Mercato Nova
+</div>
+
+<div class="container">
+
+    <h1>Creer un compte</h1>
+
+    <input
+        type="text"
+        id="nom"
+        placeholder="Nom"
+    >
+
+    <input
+        type="text"
+        id="prenom"
+        placeholder="Prenom"
+    >
+
+    <input
+        type="email"
+        id="email"
+        placeholder="Email"
+    >
+
+    <input
+        type="password"
+        id="password"
+        placeholder="Mot de passe"
+    >
+
+    <button onclick="register()">
+        Creer le compte
+    </button>
+
+    <div class="link">
+
+        <a href="login.html">
+            Deja un compte ? Connexion
+        </a>
+
+    </div>
+
+</div>
+
+<script>
+
+    async function register() {
+
+        const nom =
+            document.getElementById("nom").value;
+
+        const prenom =
+            document.getElementById("prenom").value;
+
+        const email =
+            document.getElementById("email").value;
+
+        const password =
+            document.getElementById("password").value;
+
+        try {
+
+            const response = await fetch(
+                "http://localhost/projet_piscine/Mercato_Nova/back_end/register.php",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        nom: nom,
+                        prenom: prenom,
+                        email: email,
+                        mot_de_passe: password
+                    })
+                }
+            );
+
+            const data = await response.json();
+
+            if (data.success) {
+
+                alert("Compte cree");
+
+                window.location.href =
+                    "login.html";
+
+            } else {
+
+                alert("Erreur creation compte");
+
+            }
+
+        } catch(error) {
+
+            alert("Erreur serveur");
+
+        }
+    }
+
+</script>
