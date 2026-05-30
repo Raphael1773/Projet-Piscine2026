@@ -11,7 +11,7 @@ $data = json_decode(file_get_contents("php://input"));
 if ($data === null || !isset($data->email) || !isset($data->mot_de_passe)) {
     echo json_encode([
         "success" => false,
-        "message" => "Données manquantes"
+        "message" => "Données de connexion manquantes"
     ]);
     exit();
 }
@@ -35,6 +35,7 @@ if ($result->num_rows > 0) {
 
         $_SESSION["id_utilisateur"] = $user["id_utilisateur"];
         $_SESSION["nom"] = $user["nom"];
+        $_SESSION["prenom"] = $user["prenom"];
         $_SESSION["email"] = $user["email"];
         $_SESSION["role"] = $user["role"];
 
