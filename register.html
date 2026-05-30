@@ -1,108 +1,123 @@
-<title>Register</title>
+<!DOCTYPE html>
 
-<link rel="stylesheet" href="style.css">
-<div class="site-title">
-Mercato Nova
-</div>
+<html>
 
-<div class="container">
+<head>
 
-    <h1>Creer un compte</h1>
+    <title>Register</title>
 
-    <input
-        type="text"
-        id="nom"
-        placeholder="Nom"
-    >
+    <link rel="stylesheet" href="style.css">
 
-    <input
-        type="text"
-        id="prenom"
-        placeholder="Prenom"
-    >
+</head>
 
-    <input
-        type="email"
-        id="email"
-        placeholder="Email"
-    >
+<body class="login-page">
 
-    <input
-        type="password"
-        id="password"
-        placeholder="Mot de passe"
-    >
+	<div class="site-title">
+    Mercato Nova
+	</div>
+	
+    <div class="container">
 
-    <button onclick="register()">
-        Creer le compte
-    </button>
+        <h1>Creer un compte</h1>
 
-    <div class="link">
+        <input
+            type="text"
+            id="nom"
+            placeholder="Nom"
+        >
 
-        <a href="login.html">
-            Deja un compte ? Connexion
-        </a>
+        <input
+            type="text"
+            id="prenom"
+            placeholder="Prenom"
+        >
+
+        <input
+            type="email"
+            id="email"
+            placeholder="Email"
+        >
+
+        <input
+            type="password"
+            id="password"
+            placeholder="Mot de passe"
+        >
+
+        <button onclick="register()">
+            Creer le compte
+        </button>
+
+        <div class="link">
+
+            <a href="login.html">
+                Deja un compte ? Connexion
+            </a>
+
+        </div>
 
     </div>
 
-</div>
+    <script>
 
-<script>
+        async function register() {
 
-    async function register() {
+            const nom =
+                document.getElementById("nom").value;
 
-        const nom =
-            document.getElementById("nom").value;
+            const prenom =
+                document.getElementById("prenom").value;
 
-        const prenom =
-            document.getElementById("prenom").value;
+            const email =
+                document.getElementById("email").value;
 
-        const email =
-            document.getElementById("email").value;
+            const password =
+                document.getElementById("password").value;
 
-        const password =
-            document.getElementById("password").value;
+            try {
 
-        try {
+                const response = await fetch(
+                    "http://localhost/projet_piscine/Mercato_Nova/back_end/register.php",
+                    {
+                        method: "POST",
 
-            const response = await fetch(
-                "http://localhost/projet_piscine/Mercato_Nova/back_end/register.php",
-                {
-                    method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
 
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
+                        body: JSON.stringify({
+                            nom: nom,
+                            prenom: prenom,
+                            email: email,
+                            mot_de_passe: password
+                        })
+                    }
+                );
 
-                    body: JSON.stringify({
-                        nom: nom,
-                        prenom: prenom,
-                        email: email,
-                        mot_de_passe: password
-                    })
+                const data = await response.json();
+
+                if (data.success) {
+
+                    alert("Compte cree");
+
+                    window.location.href =
+                        "login.html";
+
+                } else {
+
+                    alert("Erreur creation compte");
+
                 }
-            );
 
-            const data = await response.json();
+            } catch(error) {
 
-            if (data.success) {
-
-                alert("Compte cree");
-
-                window.location.href =
-                    "login.html";
-
-            } else {
-
-                alert("Erreur creation compte");
+                alert("Erreur serveur");
 
             }
-
-        } catch(error) {
-
-            alert("Erreur serveur");
-
         }
-    }
 
-</script>
+    </script>
+
+</body>
+
+</html>
