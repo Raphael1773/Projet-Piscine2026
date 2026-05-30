@@ -24,7 +24,7 @@ $user = $result->fetch_assoc();
     <div class="navbar">
         <div class="left-section">
             <div class="logo">LOGO</div>
-            <div class="site-name">Mercato Nova</div>
+            <a href="home.php" class="site-name"> Mercato Nova </a>        
         </div>
         <div class="search-section">
             <input type="text" placeholder="Recherche..." class="search-bar">
