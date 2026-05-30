@@ -67,7 +67,9 @@ $total = 0;
 <header class="header-panier">
     <div class="bloc-logo">
         <div class="logo-rond">LOGO</div>
+        <a href="home.php" style="text-decoration:none; color:white;">
         <h1>Mercato Nova</h1>
+        </a>
     </div>
 
     <nav class="nav-panier">
