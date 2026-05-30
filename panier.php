@@ -35,6 +35,7 @@ if ($result_panier->num_rows > 0) {
             produit.titre,
             produit.description,
             produit.type_vente
+			produit.image
         FROM lignepanier
         INNER JOIN produit ON lignepanier.id_produit = produit.id_produit
         WHERE lignepanier.id_panier = ?
@@ -108,8 +109,12 @@ $total = 0;
                     <article class="carte-panier">
 
                         <div class="image-panier">
-                            <span>Image produit</span>
-                        </div>
+    <?php if (!empty($ligne["image"]) && file_exists("images/" . $ligne["image"])) { ?>
+        <img src="images/<?= htmlspecialchars($ligne["image"]) ?>" alt="Produit">
+    <?php } else { ?>
+        <span>Image produit</span>
+    <?php } ?>
+</div>
 
                         <div class="infos-panier">
                             <h3><?= htmlspecialchars($ligne['titre']) ?></h3>
@@ -134,6 +139,10 @@ $total = 0;
                             <strong><?= number_format($sous_total, 2, ',', ' ') ?> €</strong>
                         </div>
 
+<form action="back_end/retirer_panier.php" method="POST">
+    <input type="hidden" name="id_ligne" value="<?= intval($ligne['id_ligne']) ?>">
+    <button type="submit" class="btn-retirer-panier">Retirer</button>
+</form>
                     </article>
 
                 <?php endforeach; ?>
