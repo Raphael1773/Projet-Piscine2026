@@ -782,3 +782,90 @@ a.site-name {
     margin: 20px 0;
     color: white;
 }
+.logo,
+.logo-rond {
+    overflow: hidden;
+}
+
+.logo img,
+.logo-rond img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.logo {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background-color: #2d2d2d;
+}
+
+.logo-rond {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background-color: #2d2d2d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.form-recherche {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 520px;
+}
+
+.search-bar {
+    flex: 1;
+    height: 42px;
+    padding: 0 15px;
+    background-color: #1c1c1c;
+    border: 1px solid #555;
+    color: white;
+    font-size: 16px;
+    outline: none;
+}
+
+.search-bar::placeholder {
+    color: #888;
+}
+
+.btn-recherche {
+    width: auto;
+    height: 42px;
+    padding: 0 18px;
+    background-color: #303030;
+    color: white;
+    border: 1px solid #555;
+    cursor: pointer;
+    font-size: 15px;
+    border-radius: 3px;
+    white-space: nowrap;
+}
+
+.btn-recherche:hover {
+    background-color: #444;
+}
+.message-paiement-ok {
+    background-color: #143d22;
+    border: 1px solid #2fa85c;
+    color: #d8ffe5;
+    padding: 15px;
+    margin-bottom: 25px;
+    text-align: center;
+    font-size: 18px;
+}
+
+.message-paiement-erreur {
+    background-color: #3d1414;
+    border: 1px solid #a82f2f;
+    color: #ffd8d8;
+    padding: 15px;
+    margin-bottom: 25px;
+    text-align: center;
+    font-size: 18px;
+}
+
