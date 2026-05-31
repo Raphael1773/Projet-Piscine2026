@@ -715,3 +715,70 @@ a.site-name {
     text-decoration: none;
     color: white;
 }
+.conteneur-negociation {
+    width: 80%;
+    margin: 60px auto;
+}
+
+.carte-detail-negociation {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    gap: 45px;
+    background-color: #111;
+    border: 1px solid #3a3a3a;
+    padding: 35px;
+}
+
+.image-detail-negociation {
+    height: 420px;
+    background-color: #202020;
+    border: 1px solid #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.image-detail-negociation img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.infos-detail-negociation h2 {
+    font-size: 34px;
+    margin-top: 0;
+}
+
+.description-negociation {
+    color: #aaa;
+    margin-bottom: 25px;
+}
+
+.form-negociation {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.form-negociation input,
+.form-negociation textarea {
+    background-color: #050505;
+    border: 1px solid #444;
+    color: white;
+    padding: 14px;
+    font-size: 16px;
+}
+
+.form-negociation textarea {
+    height: 110px;
+    resize: vertical;
+}
+
+.message-negociation {
+    background-color: #202020;
+    border: 1px solid #444;
+    padding: 15px;
+    margin: 20px 0;
+    color: white;
+}
