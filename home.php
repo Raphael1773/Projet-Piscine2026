@@ -29,12 +29,23 @@ if (
 
 	$sql = "
 	SELECT
-		produit.*,
-		utilisateur.nom,
-		utilisateur.prenom
+    produit.*,
+    utilisateur.nom,
+    utilisateur.prenom,
+
+    enchere.id_enchere,
+    enchere.date_fin,
+
+    (
+        SELECT MAX(offre.montant)
+        FROM offre
+        WHERE offre.id_enchere = enchere.id_enchere
+    ) AS meilleure_offre
 	FROM produit
 	LEFT JOIN utilisateur
 	ON produit.id_vendeur = utilisateur.id_utilisateur
+	LEFT JOIN enchere
+	ON produit.id_produit = enchere.id_produit
 	WHERE produit.type_vente = ?
 	ORDER BY produit.id_produit DESC
 	";
@@ -51,10 +62,19 @@ if (
 	SELECT
 		produit.*,
 		utilisateur.nom,
-		utilisateur.prenom
+		utilisateur.prenom,
+		enchere.id_enchere,
+	enchere.date_fin,
+	(
+    SELECT MAX(offre.montant)
+    FROM offre
+    WHERE offre.id_enchere = enchere.id_enchere
+	) AS meilleure_offre
 	FROM produit
 	LEFT JOIN utilisateur
 	ON produit.id_vendeur = utilisateur.id_utilisateur
+	LEFT JOIN enchere
+	ON produit.id_produit = enchere.id_produit
 	ORDER BY produit.id_produit DESC
 	";
     $result = $conn->query($sql);
@@ -77,7 +97,29 @@ if (
 </head>
 
 <body class="home-body">
+	<?php
 
+	if (
+		isset($_GET["erreur"])
+		&&
+		$_GET["erreur"] == "mise"
+	)
+	{
+		echo '
+		<div
+		style="
+			background:#ffdddd;
+			color:red;
+			padding:10px;
+			margin:10px;
+			text-align:center;
+		">
+			Mise insuffisante.
+		</div>
+		';
+	}
+
+	?>
     <div class="navbar">
 
         <div class="left-section">
@@ -147,8 +189,20 @@ if (
             while ($produit = $result->fetch_assoc()) {
 
         ?>
+				<?php
 
-                <div class="product-card">
+				$prix_affiche = $produit["prix"];
+
+				if (
+					$produit["type_vente"] == "enchere" &&
+					!empty($produit["meilleure_offre"])
+				) {
+					$prix_affiche = $produit["meilleure_offre"];
+				}
+
+				?>
+
+				<div class="product-card">
 
                     <?php
 
@@ -202,41 +256,192 @@ if (
 					>
 
 						<p>
-
 							<?php echo htmlspecialchars($produit["description"]); ?>
-
 						</p>
 
 						<p>
-
 							Etat :
 							<?php echo htmlspecialchars($produit["etat"]); ?>
-
 						</p>
 
 						<p>
-
 							Date :
 							<?php echo htmlspecialchars($produit["date_publication"]); ?>
-
 						</p>
+						<?php if ($produit["type_vente"] == "enchere") { ?>
 
 						<p>
+							Fin de l'enchère :
+							<?php echo htmlspecialchars($produit["date_fin"]); ?>
+						</p>
 
+						<?php } ?>
+						<p>
 							Vendeur :
 							<?php echo htmlspecialchars($produit["prenom"]); ?>
 							<?php echo htmlspecialchars($produit["nom"]); ?>
-
 						</p>
+
+						<?php
+
+						if (
+							$produit["type_vente"] == "enchere" &&
+							!empty($produit["id_enchere"])
+						) {
+
+							echo "<hr>";
+							echo "<h4>Historique des mises</h4>";
+
+							$sqlHistorique = "
+							SELECT
+								offre.montant,
+								offre.date_offre,
+								utilisateur.nom,
+								utilisateur.prenom
+							FROM offre
+							INNER JOIN utilisateur
+							ON offre.id_utilisateur =
+							   utilisateur.id_utilisateur
+							WHERE offre.id_enchere = ?
+							ORDER BY offre.date_offre DESC
+							";
+
+							$stmtHistorique =
+								$conn->prepare(
+									$sqlHistorique
+								);
+
+							$stmtHistorique->bind_param(
+								'i',
+								$produit["id_enchere"]
+							);
+
+							$stmtHistorique->execute();
+
+							$historique =
+								$stmtHistorique
+								->get_result();
+
+							while (
+								$mise =
+								$historique->fetch_assoc()
+							) {
+
+								?>
+
+								<p>
+
+									<?php
+									echo htmlspecialchars(
+										$mise["prenom"]
+									);
+									?>
+
+									<?php
+									echo htmlspecialchars(
+										$mise["nom"]
+									);
+									?>
+
+									-
+
+									<?php
+									echo number_format(
+										$mise["montant"],
+										2,
+										",",
+										" "
+									);
+									?>
+
+									€
+
+									<br>
+
+									<?php
+									echo $mise["date_offre"];
+									?>
+
+								</p>
+
+								<?php
+							}
+						}
+
+						?>
 
 					</div>
 
                     <p class="prix-produit">
 
-                        <?php echo number_format($produit["prix"], 2, ",", " "); ?> €
-
+							<?php echo number_format($prix_affiche, 2, ",", " "); ?> €
                     </p>
+							<?php
 
+							if (
+								$produit["type_vente"] == "enchere" &&
+								!empty($produit["id_enchere"])
+							) {
+
+								$sqlTop = "
+								SELECT
+									utilisateur.nom,
+									utilisateur.prenom,
+									offre.montant
+								FROM offre
+								INNER JOIN utilisateur
+								ON offre.id_utilisateur = utilisateur.id_utilisateur
+								WHERE offre.id_enchere = ?
+								ORDER BY offre.montant DESC
+								LIMIT 1
+								";
+
+								$stmtTop = $conn->prepare($sqlTop);
+								$stmtTop->bind_param(
+									"i",
+									$produit["id_enchere"]
+								);
+								$stmtTop->execute();
+
+								$top =
+									$stmtTop
+									->get_result()
+									->fetch_assoc();
+
+								if ($top) {
+
+							?>
+
+							<p class="top-bidder">
+
+								Meilleure offre :
+
+								<?=
+								htmlspecialchars(
+									$top["prenom"]
+								)
+								?>
+
+								<?=
+								htmlspecialchars(
+									$top["nom"]
+								)
+								?>
+
+								(<?= number_format(
+									$top["montant"],
+									2,
+									",",
+									" "
+								) ?> €)
+
+							</p>
+
+							<?php
+
+								}
+							}
+							?>
                     <p class="type-produit-home">
 
                         <?php echo htmlspecialchars($produit["type_vente"]); ?>
@@ -261,13 +466,128 @@ if (
 
                     <?php } elseif ($produit["type_vente"] === "enchere") { ?>
 
-                        <a href="encheres.php?id_produit=<?php echo intval($produit["id_produit"]); ?>">
+					<?php
 
-                            <button class="btn-action-produit">
-                                Enchérir
-                            </button>
+					$estVendeur =
+					(
+						$_SESSION["id_utilisateur"]
+						==
+						$produit["id_vendeur"]
+					);
 
-                        </a>
+					$estMeilleurEncherisseur = false;
+
+					if (
+						!empty($produit["id_enchere"])
+					)
+					{
+						$sqlTopUser = "
+						SELECT id_utilisateur
+						FROM offre
+						WHERE id_enchere = ?
+						ORDER BY montant DESC
+						LIMIT 1
+						";
+
+						$stmtTopUser =
+							$conn->prepare(
+								$sqlTopUser
+							);
+
+						$stmtTopUser->bind_param(
+							"i",
+							$produit["id_enchere"]
+						);
+
+						$stmtTopUser->execute();
+
+						$topUser =
+							$stmtTopUser
+							->get_result()
+							->fetch_assoc();
+
+						if (
+							$topUser
+							&&
+							$topUser["id_utilisateur"]
+							==
+							$_SESSION["id_utilisateur"]
+						)
+						{
+							$estMeilleurEncherisseur = true;
+						}
+					}
+
+					?>
+
+					<?php if ($estVendeur) { ?>
+
+					<p>
+					Vous êtes le vendeur
+					</p>
+
+					<?php } elseif ($estMeilleurEncherisseur) { ?>
+
+					<p>
+					Vous êtes déjà le meilleur enchérisseur
+					</p>
+
+					<?php } else { ?>
+
+					<button
+					type="button"
+					class="btn-action-produit"
+					onclick="ouvrirMise(<?= $produit['id_produit'] ?>)"
+					>
+					Enchérir
+					</button>
+
+					<div
+					id="mise-<?= $produit['id_produit'] ?>"
+					style="display:none;"
+					>
+
+					<form
+					action="back_end/encherir.php"
+					method="POST"
+					>
+
+					<input
+					type="hidden"
+					name="id_enchere"
+					value="<?= $produit['id_enchere'] ?>"
+					>
+
+					<input
+					type="number"
+					step="0.01"
+					name="montant"
+					placeholder="Votre mise"
+					required
+					>
+
+					<button type="submit">
+					Confirmer
+					</button>
+
+					<button
+					type="button"
+					onclick="fermerMise(<?= $produit['id_produit'] ?>)"
+					>
+					Annuler
+					</button>
+
+					</form>
+
+					</div>
+
+					<?php } ?>
+
+
+
+                            
+
+                        
 
                     <?php } elseif ($produit["type_vente"] === "particulier") { ?>
 
@@ -300,7 +620,7 @@ if (
         }
 
         ?>
-
+		
     </div>
 	<script>
 
@@ -316,20 +636,30 @@ if (
 
 		if (
 			bloc.style.display === "block"
-		) {
-
+		)
+		{
 			bloc.style.display = "none";
-
 			bouton.innerHTML = "+";
-
 		}
-		else {
-
+		else
+		{
 			bloc.style.display = "block";
-
 			bouton.innerHTML = "-";
-
 		}
+	}
+
+	function ouvrirMise(id)
+	{
+		document.getElementById(
+			"mise-" + id
+		).style.display = "block";
+	}
+
+	function fermerMise(id)
+	{
+		document.getElementById(
+			"mise-" + id
+		).style.display = "none";
 	}
 
 	</script>
