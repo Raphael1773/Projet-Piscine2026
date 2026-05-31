@@ -47,6 +47,10 @@ if (
 	LEFT JOIN enchere
 	ON produit.id_produit = enchere.id_produit
 	WHERE produit.type_vente = ?
+	AND (
+		produit.type_vente <> 'enchere'
+		OR enchere.date_fin > NOW()
+	)
 	ORDER BY produit.id_produit DESC
 	";
 
@@ -75,6 +79,12 @@ if (
 	ON produit.id_vendeur = utilisateur.id_utilisateur
 	LEFT JOIN enchere
 	ON produit.id_produit = enchere.id_produit
+	WHERE
+	(
+		produit.type_vente != 'enchere'
+		OR
+		enchere.date_fin > NOW()
+	)
 	ORDER BY produit.id_produit DESC
 	";
     $result = $conn->query($sql);
@@ -149,13 +159,17 @@ if (
             <a href="panier.php" class="icon-link">
                 Panier
             </a>
-
+			
+			<a href="mes_encheres.php" class="icon-link">
+				Mes enchères
+			</a>
+			
             <a href="profile.php" class="icon-link">
                 Profil
             </a>
 
         </div>
-
+		
     </div>
 
     <div class="menu-buttons">
@@ -600,7 +614,30 @@ if (
                         </a>
 
                     <?php } ?>
+					<?php if ($_SESSION["role"] == "admin") { ?>
 
+					<form
+						action="back_end/supprimer_produit.php"
+						method="POST"
+						onsubmit="return confirm('Supprimer ce produit ?');"
+					>
+
+						<input
+							type="hidden"
+							name="id_produit"
+							value="<?= $produit["id_produit"] ?>"
+						>
+
+						<button
+							type="submit"
+							class="btn-action-produit"
+						>
+							Supprimer
+						</button>
+
+					</form>
+
+					<?php } ?>
                 </div>
 
         <?php
