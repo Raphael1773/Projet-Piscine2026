@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <title>Connexion</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body class="login-page">
+
+	<div class="site-title">
+		Mercato Nova
+	</div>
+
+    <div class="container">
+
+        <h1>Connexion</h1>
+
+        <input
+            type="email"
+            id="email"
+            placeholder="Email"
+        >
+
+        <input
+            type="password"
+            id="password"
+            placeholder="Mot de passe"
+        >
+
+        <button onclick="login()">
+            Se connecter
+        </button>
+
+        <div class="link">
+
+            <a href="register.html">
+                Pas de compte ? Creer un compte
+            </a>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        async function login() {
+
+            const email =
+                document.getElementById("email").value;
+
+            const password =
+                document.getElementById("password").value;
+
+            try {
+
+                const response = await fetch(
+                    "http://localhost/projet_piscine/Mercato_Nova/back_end/login.php",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            email: email,
+                            mot_de_passe: password
+                        })
+                    }
+                );
+
+                const data = await response.json();
+
+                if (data.success) {
+
+                    window.location.href =
+                        "http://localhost/projet_piscine/Mercato_Nova/home.php";
+
+                } else {
+
+                    alert("Email ou mot de passe incorrect");
+
+                }
+
+            } catch(error) {
+
+                alert("Erreur serveur");
+
+            }
+        }
+
+    </script>
+
+</body>
+
+</html>
