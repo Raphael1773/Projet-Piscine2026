@@ -23,12 +23,12 @@ $user = $result->fetch_assoc();
  
     <div class="navbar">
         <div class="left-section">
-            <div class="logo">LOGO</div>
+            <div class="logo">
+    <img src="images/logo.png" alt="Logo Mercato Nova">
+</div>
             <a href="home.php" class="site-name"> Mercato Nova </a>        
         </div>
-        <div class="search-section">
-            <input type="text" placeholder="Recherche..." class="search-bar">
-        </div>
+        
         <div class="right-section">
             <a href="panier.php" class="icon-link">Panier</a>
             <a href="profile.php" class="icon-link">Profil</a>
@@ -56,6 +56,9 @@ $user = $result->fetch_assoc();
                 <a href="mise_en_vente.php">
                     <button class="profile-btn">Mettre en vente un produit</button>
                 </a>
+				<a href="mes_negociations.php" class="btn-action-produit">
+    Mes négociations
+</a>
                 <button class="profile-btn deconnexion-btn" onclick="deconnexion()">
                     Se Déconnecter
                 </button>
