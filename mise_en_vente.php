@@ -56,11 +56,73 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $image
     );
 
-    if ($stmt->execute()) {
+	if ($stmt->execute()) {
 
-    header("Location: home.php");
+		$id_produit =
+			$conn->insert_id;
 
-    exit();}
+		if (
+			$type_vente == "enchere"
+		)
+		{
+			$jours =
+				intval($_POST["jours"]);
+
+			$heures =
+				intval($_POST["heures"]);
+
+			$minutes =
+				intval($_POST["minutes"]);
+
+			$date_fin =
+				date(
+					"Y-m-d H:i:s",
+					time()
+					+
+					($jours * 86400)
+					+
+					($heures * 3600)
+					+
+					($minutes * 60)
+				);
+
+			$sqlEnchere =
+			"
+			INSERT INTO enchere
+			(
+				prix_depart,
+				date_fin,
+				id_produit
+			)
+			VALUES
+			(
+				?,
+				?,
+				?
+			)
+			";
+
+			$stmtEnchere =
+				$conn->prepare(
+					$sqlEnchere
+				);
+
+			$stmtEnchere->bind_param(
+				"dsi",
+				$prix,
+				$date_fin,
+				$id_produit
+			);
+
+			$stmtEnchere->execute();
+		}
+
+		header(
+			"Location: home.php"
+		);
+
+		exit();
+	}
 	else {
         $message = "Erreur lors de l'ajout";
     }
@@ -132,18 +194,22 @@ $categories = $conn->query(
                 required
             >
 
-            <select name="type_vente" required>
+			<select
+				name="type_vente"
+				id="type_vente"
+				onchange="gererTypeVente()"
+			>
 
-				<option value="">
-					Choisir un type de vente
-				</option>
+			<?php if ($_SESSION["role"] == "admin") { ?>
 
 				<option value="simple">
-					Vente simple
+					Simple
 				</option>
 
+			<?php } ?>
+
 				<option value="enchere">
-					Enchere
+					Enchère
 				</option>
 
 				<option value="particulier">
@@ -152,6 +218,68 @@ $categories = $conn->query(
 
 			</select>
 
+			<div
+				id="options-enchere"
+				style="display:none;"
+			>
+
+				<h3>
+					Durée de l'enchère
+				</h3>
+
+				<input
+					type="number"
+					name="jours"
+					min="0"
+					placeholder="Jours"
+				>
+
+				<input
+					type="number"
+					name="heures"
+					min="0"
+					max="23"
+					placeholder="Heures"
+				>
+
+				<input
+					type="number"
+					name="minutes"
+					min="0"
+					max="59"
+					placeholder="Minutes"
+				>
+
+			</div>
+			<script>
+
+			function gererTypeVente()
+			{
+				let type =
+					document.getElementById(
+						"type_vente"
+					).value;
+
+				let bloc =
+					document.getElementById(
+						"options-enchere"
+					);
+
+				if (type == "enchere")
+				{
+					bloc.style.display = "block";
+				}
+				else
+				{
+					bloc.style.display = "none";
+				}
+			}
+
+			window.onload =
+				gererTypeVente;
+
+			</script>
+			
             <input
                 type="text"
                 name="image"
