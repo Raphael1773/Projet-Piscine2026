@@ -17,10 +17,6 @@ if (!isset($_POST["id_panier"])) {
 $id_utilisateur = $_SESSION["id_utilisateur"];
 $id_panier = intval($_POST["id_panier"]);
 
-/*
-    On récupère uniquement les lignes du panier actif
-    appartenant à l'utilisateur connecté.
-*/
 $sql_lignes = "
     SELECT 
         lignepanier.id_ligne,
@@ -43,6 +39,7 @@ $sql_lignes = "
 $stmt_lignes = $conn->prepare($sql_lignes);
 $stmt_lignes->bind_param("ii", $id_panier, $id_utilisateur);
 $stmt_lignes->execute();
+
 $result_lignes = $stmt_lignes->get_result();
 
 if ($result_lignes->num_rows === 0) {
@@ -50,9 +47,6 @@ if ($result_lignes->num_rows === 0) {
     exit();
 }
 
-/*
-    On démarre une transaction SQL pour éviter les incohérences.
-*/
 $conn->begin_transaction();
 
 try {
@@ -66,7 +60,7 @@ try {
         $type_vente = $ligne["type_vente"];
 
         /*
-            Création d'une transaction simulée.
+            On crée une transaction simulée.
         */
         $sql_transaction = "
             INSERT INTO transactionn
@@ -85,28 +79,20 @@ try {
         $stmt_transaction->execute();
 
         /*
-            Si c'est une négociation / particulier,
-            l'annonce devient vendue.
-            On ne supprime pas vraiment la ligne SQL pour garder l'historique.
+            Produit simple :
+            on ne change rien.
+            Il reste disponible à l'infini.
         */
-        if ($type_vente === "particulier") {
-
-            $sql_update_produit = "
-                UPDATE produit
-                SET statut = 'vendu'
-                WHERE id_produit = ?
-            ";
-
-            $stmt_update_produit = $conn->prepare($sql_update_produit);
-            $stmt_update_produit->bind_param("i", $id_produit);
-            $stmt_update_produit->execute();
+        if ($type_vente === "simple") {
+            continue;
         }
 
         /*
-            Si plus tard vous ajoutez les enchères au panier,
-            on peut aussi marquer l'annonce comme vendue.
+            Produit particulier ou enchère :
+            une fois payé, il devient vendu.
+            Il disparaît donc du home.
         */
-        if ($type_vente === "enchere") {
+        if ($type_vente === "particulier" || $type_vente === "enchere") {
 
             $sql_update_produit = "
                 UPDATE produit
@@ -121,9 +107,9 @@ try {
     }
 
     /*
-        Le panier n'est pas supprimé, il passe juste en validé.
+        Le panier est validé.
         Comme panier.php affiche seulement le panier actif,
-        les produits disparaissent automatiquement.
+        les produits disparaissent du panier.
     */
     $sql_update_panier = "
         UPDATE panier
