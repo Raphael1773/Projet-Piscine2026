@@ -84,6 +84,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 					($heures * 3600)
 					+
 					($minutes * 60)
+					+
+					7200
 				);
 
 			$sqlEnchere =
