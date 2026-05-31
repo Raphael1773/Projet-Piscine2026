@@ -17,6 +17,10 @@ if (!isset($_POST["id_panier"])) {
 $id_utilisateur = $_SESSION["id_utilisateur"];
 $id_panier = intval($_POST["id_panier"]);
 
+/*
+    On récupère uniquement les lignes du panier actif
+    appartenant à l'utilisateur connecté.
+*/
 $sql_lignes = "
     SELECT 
         lignepanier.id_ligne,
@@ -24,10 +28,13 @@ $sql_lignes = "
         lignepanier.prix_unitaire,
         lignepanier.id_produit,
         produit.type_vente,
+        produit.titre,
         produit.statut
     FROM lignepanier
-    INNER JOIN panier ON lignepanier.id_panier = panier.id_panier
-    INNER JOIN produit ON lignepanier.id_produit = produit.id_produit
+    INNER JOIN panier 
+        ON lignepanier.id_panier = panier.id_panier
+    INNER JOIN produit 
+        ON lignepanier.id_produit = produit.id_produit
     WHERE lignepanier.id_panier = ?
     AND panier.id_utilisateur = ?
     AND panier.statut = 'actif'
@@ -43,38 +50,104 @@ if ($result_lignes->num_rows === 0) {
     exit();
 }
 
-while ($ligne = $result_lignes->fetch_assoc()) {
-
-    $montant_total = $ligne["prix_unitaire"] * $ligne["quantite"];
-
-    $sql_transaction = "INSERT INTO transactionn
-        (montant_total, date_transaction, statut, mode_paiement, id_acheteur, id_produit)
-        VALUES
-        (?, NOW(), 'validee', 'simulation', ?, ?)";
-
-    $stmt_transaction = $conn->prepare($sql_transaction);
-    $stmt_transaction->bind_param(
-        "dii",
-        $montant_total,
-        $id_utilisateur,
-        $ligne["id_produit"]
-    );
-    $stmt_transaction->execute();
-}
-
 /*
-    Le panier devient validé.
+    On démarre une transaction SQL pour éviter les incohérences.
 */
-$sql_update_panier = "UPDATE panier
-                      SET statut = 'valide'
-                      WHERE id_panier = ?
-                      AND id_utilisateur = ?";
+$conn->begin_transaction();
 
-$stmt_update = $conn->prepare($sql_update_panier);
-$stmt_update->bind_param("ii", $id_panier, $id_utilisateur);
-$stmt_update->execute();
+try {
 
-header("Location: panier.php?commande=ok");
-exit();
+    while ($ligne = $result_lignes->fetch_assoc()) {
+
+        $id_produit = intval($ligne["id_produit"]);
+        $quantite = intval($ligne["quantite"]);
+        $prix_unitaire = floatval($ligne["prix_unitaire"]);
+        $montant_total = $prix_unitaire * $quantite;
+        $type_vente = $ligne["type_vente"];
+
+        /*
+            Création d'une transaction simulée.
+        */
+        $sql_transaction = "
+            INSERT INTO transactionn
+            (montant_total, date_transaction, statut, mode_paiement, id_acheteur, id_produit)
+            VALUES
+            (?, NOW(), 'validee', 'simulation', ?, ?)
+        ";
+
+        $stmt_transaction = $conn->prepare($sql_transaction);
+        $stmt_transaction->bind_param(
+            "dii",
+            $montant_total,
+            $id_utilisateur,
+            $id_produit
+        );
+        $stmt_transaction->execute();
+
+        /*
+            Si c'est une négociation / particulier,
+            l'annonce devient vendue.
+            On ne supprime pas vraiment la ligne SQL pour garder l'historique.
+        */
+        if ($type_vente === "particulier") {
+
+            $sql_update_produit = "
+                UPDATE produit
+                SET statut = 'vendu'
+                WHERE id_produit = ?
+            ";
+
+            $stmt_update_produit = $conn->prepare($sql_update_produit);
+            $stmt_update_produit->bind_param("i", $id_produit);
+            $stmt_update_produit->execute();
+        }
+
+        /*
+            Si plus tard vous ajoutez les enchères au panier,
+            on peut aussi marquer l'annonce comme vendue.
+        */
+        if ($type_vente === "enchere") {
+
+            $sql_update_produit = "
+                UPDATE produit
+                SET statut = 'vendu'
+                WHERE id_produit = ?
+            ";
+
+            $stmt_update_produit = $conn->prepare($sql_update_produit);
+            $stmt_update_produit->bind_param("i", $id_produit);
+            $stmt_update_produit->execute();
+        }
+    }
+
+    /*
+        Le panier n'est pas supprimé, il passe juste en validé.
+        Comme panier.php affiche seulement le panier actif,
+        les produits disparaissent automatiquement.
+    */
+    $sql_update_panier = "
+        UPDATE panier
+        SET statut = 'valide'
+        WHERE id_panier = ?
+        AND id_utilisateur = ?
+        AND statut = 'actif'
+    ";
+
+    $stmt_update_panier = $conn->prepare($sql_update_panier);
+    $stmt_update_panier->bind_param("ii", $id_panier, $id_utilisateur);
+    $stmt_update_panier->execute();
+
+    $conn->commit();
+
+    header("Location: panier.php?paiement=ok");
+    exit();
+
+} catch (Exception $e) {
+
+    $conn->rollback();
+
+    header("Location: panier.php?paiement=erreur");
+    exit();
+}
 
 ?>
