@@ -66,25 +66,42 @@ $total = 0;
 
 <header class="header-panier">
     <div class="bloc-logo">
-        <div class="logo-rond">LOGO</div>
+        <div class="logo-rond">
+    <img src="images/logo.png" alt="Logo Mercato Nova">
+</div>
         <a href="home.php" style="text-decoration:none; color:white;">
         <h1>Mercato Nova</h1>
         </a>
     </div>
 
     <nav class="nav-panier">
-        <a href="home.php">Produits</a>
-        <a href="encheres.php">Enchères</a>
-        <a href="particuliers.php">Particuliers</a>
-        <a href="panier.php">Panier</a>
-        <a href="profile.php">Profile</a>
-    </nav>
+    <a href="home.php?type=simple">Produits</a>
+    <a href="home.php?type=enchere">Enchères</a>
+    <a href="home.php?type=particulier">Particuliers</a>
+    <a href="panier.php">Panier</a>
+    <a href="profile.php">Profile</a>
+</nav>
 </header>
 
 <main class="conteneur-panier">
 
     <section class="titre-panier">
         <h2>Mon panier</h2>
+		<?php if (isset($_GET["paiement"]) && $_GET["paiement"] === "ok") { ?>
+
+    <div class="message-paiement-ok">
+        Paiement accepté. Votre commande a bien été validée.
+    </div>
+
+<?php } ?>
+
+<?php if (isset($_GET["paiement"]) && $_GET["paiement"] === "erreur") { ?>
+
+    <div class="message-paiement-erreur">
+        Une erreur est survenue pendant le paiement.
+    </div>
+
+<?php } ?>
         <p>Retrouvez ici les produits que vous souhaitez acheter.</p>
     </section>
 
